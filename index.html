@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini DJ Beat Game</title>
+
+  <!-- Carregando PyScript versão estável -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2025.11.2/core.css" />
+  <script type="module" src="https://pyscript.net/releases/2025.11.2/core.js"></script>
+
+  <style>
+    body {
+      background: black;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+    }
+    canvas {
+      background: #111;
+      border: 2px solid white;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Mini DJ Beat Game</h1>
+<p>Aperte A quando o bloco encostar na linha!</p>
+
+<canvas id="gameCanvas" width="400" height="500"></canvas>
+
+<py-script>
+from js import document, window
+import random
+
+canvas = document.getElementById("gameCanvas")
+ctx = canvas.getContext("2d")
+
+notes = []
+score = 0
+game_speed = 3
+beat_line_y = 420
+
+class Note:
+    def __init__(self):
+        self.x = 180
+        self.y = 0
+        self.hit = False
+
+    def update(self):
+        self.y += game_speed
+
+    def draw(self):
+        ctx.fillStyle = "cyan"
+        ctx.fillRect(self.x, self.y, 40, 20)
+
+def spawn_note():
+    notes.append(Note())
+
+def draw_beat_line():
+    ctx.fillStyle = "red"
+    ctx.fillRect(0, beat_line_y, 400, 5)
+
+def draw_score():
+    ctx.fillStyle = "white"
+    ctx.font = "20px Arial"
+    ctx.fillText(f"Score: {score}", 10, 30)
+
+def update():
+    global score
+    ctx.clearRect(0, 0, 400, 500)
+    draw_beat_line()
+    draw_score()
+    for note in notes:
+        note.update()
+        note.draw()
+    window.requestAnimationFrame(update)
+
+def keydown(event):
+    global score
+    if event.key.lower() == "a":
+        for note in notes:
+            if abs(note.y - beat_line_y) < 20 and not note.hit:
+                score += 1
+                note.hit = True
+
+document.addEventListener("keydown", keydown)
+
+def game_loop():
+    spawn_note()
+    window.setTimeout(game_loop, 1000)
+
+update()
+game_loop()
+</py-script>
+
+</body>
+</html>
