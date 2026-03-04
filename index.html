@@ -31,6 +31,7 @@
 
 <py-script>
 from js import document, window
+from pyodide.ffi import create_proxy
 import random
 
 canvas = document.getElementById("gameCanvas")
@@ -68,13 +69,17 @@ def draw_score():
 
 def update():
     global score
+
     ctx.clearRect(0, 0, 400, 500)
+
     draw_beat_line()
     draw_score()
+
     for note in notes:
         note.update()
         note.draw()
-    window.requestAnimationFrame(update)
+
+    window.requestAnimationFrame(update_proxy)
 
 def keydown(event):
     global score
@@ -84,14 +89,19 @@ def keydown(event):
                 score += 1
                 note.hit = True
 
-document.addEventListener("keydown", keydown)
+document.addEventListener("keydown", create_proxy(keydown))
 
-def game_loop():
+# ---- LOOP CORRETO DE SPAWN ----
+
+def spawn_loop():
     spawn_note()
-    window.setTimeout(game_loop, 1000)
+    window.setTimeout(spawn_proxy, 1000)
+
+spawn_proxy = create_proxy(spawn_loop)
+update_proxy = create_proxy(update)
 
 update()
-game_loop()
+spawn_loop()
 </py-script>
 
 </body>
